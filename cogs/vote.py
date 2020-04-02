@@ -12,6 +12,9 @@ class Vote(commands.Cog):
                       brief='Vote to kick desired user. More info !help votekick',
                       help='Vote to kick desired user. Passes only if 2/3 vc members voted for yes. '
                            '30 min cooldown per user.')
+    # TODO:
+    # 1. Fix cooldown, yield cooldown time and user on try.
+    # 2. Clean up code
     @commands.cooldown(1, 1800, type=commands.BucketType.user)
     async def votekick(self, ctx: discord.ext.commands.Context, user: str, time=30):
         author = ctx.message.author
@@ -45,15 +48,15 @@ class Vote(commands.Cog):
         await vote.add_reaction(emoji_no)
         reactions = vote.reactions
 
-        # wait until reactions list is properly refreshed (and has only 2 votes)
+        # wait until reactions list is properly refreshed
         while len(reactions) != 2:
             await asyncio.sleep(1)
             vote = await ctx.fetch_message(vote.id)
             reactions = vote.reactions
 
         # send timer message
-        # if time < 10:
-        #     time = 20
+        if time < 10:
+            time = 20
         timer = await ctx.send(f'{time} seconds left!')
 
         # iterate through given voice channel
@@ -88,6 +91,12 @@ class Vote(commands.Cog):
         for i in members:
             # if we find desired victim
             if i.id == victim.id:
+
+                # wait until reactions list is properly refreshed (and has only 2 votes)
+                while len(reactions) != 2:
+                    await asyncio.sleep(1)
+                    vote = await ctx.fetch_message(vote.id)
+                    reactions = vote.reactions
 
                 # if anyone has voted
                 if reactions[0].count + reactions[1].count > 2:
