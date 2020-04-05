@@ -10,7 +10,7 @@ class Vote(commands.Cog):
 
     @commands.command(name='votekick', usage='{@user} {time in seconds}',
                       brief='Vote to kick specified user. More info !help votekick',
-                      help='Vote to kick desired user. Passes only if 2/3 vc members voted for yes. '
+                      help='Vote to kick specified user. Passes only if 2/3 vc members voted for yes. '
                            '30 min cooldown per user.')
     # TODO:
     # 1. Fix cooldown, yield cooldown time and user on try.
