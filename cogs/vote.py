@@ -9,7 +9,7 @@ class Vote(commands.Cog):
         self.bot = bot
 
     @commands.command(name='votekick', usage='{@user} {time in seconds}',
-                      brief='Vote to kick desired user. More info !help votekick',
+                      brief='Vote to kick specified user. More info !help votekick',
                       help='Vote to kick desired user. Passes only if 2/3 vc members voted for yes. '
                            '30 min cooldown per user.')
     # TODO:
