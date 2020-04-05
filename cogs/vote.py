@@ -75,7 +75,7 @@ class Vote(commands.Cog):
             members = voice_channel.members
             # if user no longer in given channel, mock and punish him
             if victim_member not in members:
-                await ctx.send(f'{victim.mention} fled!')
+                await ctx.send(f'{victim.mention} fleed!')
                 await vote.delete()
                 await timer.delete()
                 await victim_member.add_roles(kicked_role)
