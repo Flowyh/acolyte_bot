@@ -17,6 +17,7 @@ class Vote(commands.Cog):
     # 2. Clean up code
     @commands.cooldown(1, 1800, type=commands.BucketType.user)
     async def votekick(self, ctx: discord.ext.commands.Context, user: str, time=30):
+        await self.bot.debug("Testowa wiadomosc debugowa")
         author = ctx.message.author
         victim_id = int(user.replace('<', '').replace('@', '').replace('>', '').replace('!', ''))
         victim = await self.bot.fetch_user(user_id=victim_id)
