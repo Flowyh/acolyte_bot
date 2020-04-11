@@ -44,6 +44,16 @@ async def debug(msg):
 bot.debug = debug
 
 
+@bot.event
+async def on_ready():
+    print(f'Bot connected!')
+
+
+# @bot.event
+# async def on_command_error(ctx, error):
+#     pass
+
+
 @bot.command()
 async def load(ctx, extension):
     bot.load_extension(f'cogs.{extension}')

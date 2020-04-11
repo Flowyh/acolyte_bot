@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import asyncio
+from utils import find_role, add_reactions_to_msg
+from properties import global_cooldowns
 
 
 class Vote(commands.Cog):
@@ -9,13 +11,12 @@ class Vote(commands.Cog):
         self.bot = bot
 
     @commands.command(name='votekick', usage='{@user} {time in seconds}',
-                      brief='Vote to kick desired user. More info !help votekick',
-                      help='Vote to kick desired user. Passes only if 2/3 vc members voted for yes. '
-                           '30 min cooldown per user.')
+                      brief='Vote to kick specified user. More info !help votekick',
+                      help='Vote to kick specified user. Passes only if 2/3 vc members voted for yes. '
+                           f'{int(global_cooldowns["votekick"] / 60)} min cooldown per user.')
     # TODO:
-    # 1. Fix cooldown, yield cooldown time and user on try.
-    # 2. Clean up code
-    @commands.cooldown(1, 1800, type=commands.BucketType.user)
+    # 1. Clean up code
+    @commands.cooldown(1, global_cooldowns['votekick'], type=commands.BucketType.user)
     async def votekick(self, ctx: discord.ext.commands.Context, user: str, time=30):
         await self.bot.debug("Testowa wiadomosc debugowa")
         author = ctx.message.author
@@ -33,31 +34,31 @@ class Vote(commands.Cog):
 
         # find KICKED role in server
         # KICKED temporary blocks from joining any voice channels, default time = 10 seconds
-        kicked_role = discord.Role
-        for role in guild.roles:
-            if role.name == 'KICKED':
-                kicked_role = role
-                break
+        try:
+            kicked_role = find_role(guild, 'KICKED')
+        except ValueError:
+            await ctx.send('Role KICKED was not found!')
+            raise
 
         # send votekick message
         vote = await ctx.send(f'Vote to kick user: {victim.mention}. Vote author: {author.mention}. '
                               f'\N{THUMBS UP SIGN} for yes, \N{THUMBS DOWN SIGN} for no.')
+
         # add reactions to vote
         emoji_yes = '\N{THUMBS UP SIGN}'
         emoji_no = '\N{THUMBS DOWN SIGN}'
-        await vote.add_reaction(emoji_yes)
-        await vote.add_reaction(emoji_no)
-        reactions = vote.reactions
+        await add_reactions_to_msg(vote, [emoji_yes, emoji_no])
 
+        reactions = vote.reactions
         # wait until reactions list is properly refreshed
-        while len(reactions) != 2:
+        while len(reactions) < 2:
             await asyncio.sleep(1)
             vote = await ctx.fetch_message(vote.id)
             reactions = vote.reactions
 
         # send timer message
         if time < 10:
-            time = 20
+            time = 30
         timer = await ctx.send(f'{time} seconds left!')
 
         # iterate through given voice channel
@@ -88,16 +89,19 @@ class Vote(commands.Cog):
                 await victim_member.remove_roles(kicked_role)
                 break
 
+        # wait until reactions are properly refreshed just in case
+        while len(reactions) < 2:
+            await asyncio.sleep(1)
+        vote = await ctx.fetch_message(vote.id)
+
+        # fetch one more time reactions
+        reactions = vote.reactions
+
         # iterate through channel members
         for i in members:
+
             # if we find desired victim
             if i.id == victim.id:
-
-                # wait until reactions list is properly refreshed (and has only 2 votes)
-                while len(reactions) != 2:
-                    await asyncio.sleep(1)
-                    vote = await ctx.fetch_message(vote.id)
-                    reactions = vote.reactions
 
                 # if anyone has voted
                 if reactions[0].count + reactions[1].count > 2:
@@ -133,6 +137,16 @@ class Vote(commands.Cog):
                     time -= 1
                     await asyncio.sleep(1)
                 await i.remove_roles(kicked_role)
+
+    @votekick.error
+    async def votekick_errorrs_handler(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            time = ''
+            minutes = int(error.retry_after) / 60
+            if minutes > 0:
+                time += str(int(minutes)) + 'min '
+            time += str(int(error.retry_after) % 60) + 's'
+            await ctx.send(f'Command is still on cooldown! {time} left!')
 
 
 def setup(bot):
