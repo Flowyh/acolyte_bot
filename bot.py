@@ -10,6 +10,16 @@ GUILD = os.getenv('DISCORD_GUILD')
 bot = commands.Bot(command_prefix='!')
 
 
+@bot.event
+async def on_ready():
+    print(f'Bot connected!')
+
+
+# @bot.event
+# async def on_command_error(ctx, error):
+#     pass
+
+
 @bot.command()
 async def load(ctx, extension):
     bot.load_extension(f'cogs.{extension}')
