@@ -35,11 +35,10 @@ class User(Base):
         self.money -= amount
         to.money += amount
 
-    def create_bet(self, session, description, initial_amount):
+    def create_bet(self, session, description):
         bet = Bet(creator=self, description=description)
-        be = BetEntry(user=self, bet=bet, on=True, amount=initial_amount)
 
-        session.add_all([bet, be])
+        session.add(bet)
         return bet
 
     def enter_bet(self, session, bet, amount, on):

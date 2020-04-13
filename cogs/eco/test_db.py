@@ -9,7 +9,8 @@ def test_single_bet():
     u2 = User(nick="ryszard", discord_id=1, guild_id=0, money=1000)
     session.add_all([u1, u2])
 
-    b1 = u1.create_bet(session, "test bet", 100)
+    b1 = u1.create_bet(session, "test bet")
+    u1.enter_bet(session, b1, 100, True)
     u2.enter_bet(session, b1, 300, False)
 
     b1.resolve(session, True)
@@ -39,10 +40,14 @@ def test_two_bets():
     u2 = User(nick="ryszard", discord_id=1, guild_id=0, money=1000)
     session.add_all([u1, u2])
 
-    b1 = u1.create_bet(session, "test bet", 100)
-    b2 = u2.create_bet(session, "test bet no. 2", 200)
-    u2.enter_bet(session, b1, 300, False)
+    b1 = u1.create_bet(session, "test bet")
+    b2 = u2.create_bet(session, "test bet no. 2")
+
+    u1.enter_bet(session, b1, 100, True)
     u1.enter_bet(session, b2, 500, False)
+
+    u2.enter_bet(session, b2, 200, True)
+    u2.enter_bet(session, b1, 300, False)
 
     b1.resolve(session, True)
     b2.resolve(session, True)
