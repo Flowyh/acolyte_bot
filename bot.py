@@ -19,17 +19,18 @@ async def on_ready():
     global DEBUG_USERS
     DEBUG_USERS = [bot.get_user(int(i)) for i in DEBUG_IDS]
 
-@bot.event
-async def on_command_error(error, *args, **kwargs):
-    print("senging to users:", DEBUG_USERS)
-    for u in DEBUG_USERS:
-        ch = u.dm_channel
-        if ch is None:
-            await u.create_dm()
-            ch = u.dm_channel
-        msg = "```Exception:\nFailed on with error {}\nwith args: {}\n kwargs: {}```".format(error, args, kwargs)
-        await ch.send(msg)
-        print("Sent message\n", msg)
+# TODO format error exceptions with __repr__ somewhere
+# @bot.event
+# async def on_command_error(error, *args, **kwargs):
+#     print("senging to users:", DEBUG_USERS)
+#     for u in DEBUG_USERS:
+#         ch = u.dm_channel
+#         if ch is None:
+#             await u.create_dm()
+#             ch = u.dm_channel
+#         msg = "```Exception:\nFailed on with error {}\nwith args: {}\n kwargs: {}```".format(error, args, kwargs)
+#         await ch.send(msg)
+#         print("Sent message\n", msg)
 
 async def debug(msg):
     group = []
