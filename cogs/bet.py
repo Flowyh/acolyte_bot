@@ -4,6 +4,7 @@ from .eco import Bet as DbBet
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
+from typing import Union
 import re
 
 
@@ -27,9 +28,11 @@ async def get_user_from_string(ctx, s):
     return user
 
 
-def database_user(session, u: discord.User) -> User:  # TODO: this introduces a critical bug on multiple guilds
-    print("WARNING: I STILL HAVEN'T FIXED THIS")
-    db_user = session.query(User).filter_by(discord_id=u.id).first()
+def database_user(session, u: Union[discord.User, Context], g: discord.Guild = None) -> User:  
+    if isinstance(u, Context):
+        g = u.guild
+        u = u.message.author
+    db_user = session.query(User).filter_by(discord_id=u.id).filter_by(guild_id=g.id).first()
     return db_user
 
 
