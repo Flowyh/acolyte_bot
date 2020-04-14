@@ -29,9 +29,13 @@ async def get_user_from_string(ctx, s):
 
 
 def database_user(session, u: Union[discord.User, Context], g: discord.Guild = None) -> User:  
+    print(type(u))
     if isinstance(u, Context):
+        print("Got context")
         g = u.guild
         u = u.message.author
+    assert u is not None
+    assert g is not None
     db_user = session.query(User).filter_by(discord_id=u.id).filter_by(guild_id=g.id).first()
     return db_user
 
@@ -74,7 +78,7 @@ class Bet(commands.Cog):
 
         session = Session()
 
-        db_user = session.query(User).filter_by(discord_id=caller.id).first()
+        db_user = database_user(session, ctx)
         if db_user is None:
             await ctx.channel.send(f"You must register first")
 
@@ -138,10 +142,6 @@ class Bet(commands.Cog):
 
         await ctx.channel.send("Bet resolved")
 
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
-        print(message)
-        print(message.content)
 
 def setup(bot):
     bot.add_cog(Bet(bot))
