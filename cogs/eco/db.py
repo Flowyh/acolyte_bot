@@ -36,7 +36,7 @@ class User(Base):
         to.money += amount
 
     def create_bet(self, session, description):
-        bet = Bet(creator=self, description=description)
+        bet = Bet(creator=self, description=description, active=True)
 
         session.add(bet)
         return bet
@@ -59,6 +59,10 @@ class Bet(Base):
     creator = relationship("User", back_populates="bets")
 
     def enter_user(self, session, user, amount, on):
+        min_money = user.money - sum((e.amount for e in user.bet_entries if e.bet.active))
+        if amount > min_money:
+            raise ValueError("Not enough money")
+            
         be = BetEntry(user=user, bet=self, on=on, amount=amount)
         session.add(be)
 
@@ -85,6 +89,8 @@ class Bet(Base):
                 user.money += for_win
             elif not result and not on:
                 user.money +=  against_win
+
+        self.active = False
 
     def __repr__(self):
         return f"Bet(creator={self.creator}, description='{self.description}', active={self.active})"
