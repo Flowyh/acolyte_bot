@@ -52,9 +52,9 @@ class Bet(Base):
     # User entries for discord users on different guilds
 
     id = Column(Integer, primary_key=True)
-    creator_id =  Column(Integer, ForeignKey('users.id'))
-    description = Column(String)
-    active = Column(Boolean)
+    creator_id =  Column(Integer, ForeignKey('users.id'), nullable=False)
+    description = Column(String, nullable=False)
+    active = Column(Boolean, nullable=False)
     
     creator = relationship("User", back_populates="bets")
 
@@ -65,6 +65,21 @@ class Bet(Base):
             
         be = BetEntry(user=user, bet=self, on=on, amount=amount)
         session.add(be)
+
+    def leave_user(self, session, user):
+        a = session.query(BetEntry).all()
+        print("\n".join(map(str, a)))
+        be = session.query(BetEntry)\
+                .filter_by(bet_id=self.id)\
+                .filter_by(user_id=user.id)\
+                .first()
+        if be is None:
+            raise ValueError("User is not in this Bet")
+        session.delete(be)
+
+        # mark Bet and User as out of date - this will effectively remove the BetEntry from all instances
+        session.expire(self)  
+        session.expire(user)
 
     def resolve(self, session, result):
 
