@@ -28,6 +28,7 @@ class TimeEntry(Base):
                             func.sum(TimeEntry.amount * TimeEntry.resolution).label("total_time"),
                             )\
                             .filter_by(guild_id=guild_id)\
+                            .group_by(TimeEntry.discord_id)\
                             .order_by("total_time")\
                             .all()
         return res
