@@ -76,8 +76,8 @@ async def reload(ctx, extension):
     bot.unload_extension(f'cogs.{extension}')
     bot.load_extension(f'cogs.{extension}')
 
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        bot.load_extension(f'cogs.{filename[:-3]}')
+bot.load_extension("cogs.vote")
+bot.load_extension("cogs.timespent")
+bot.load_extension("cogs.bet")
 
 bot.run(TOKEN)

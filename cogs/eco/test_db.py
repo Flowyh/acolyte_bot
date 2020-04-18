@@ -30,7 +30,30 @@ def test_single_bet():
     assert u1.money == 1300
     assert u2.money == 700
 
+    session.commit()
+    session.close()
+
     # session.commit()
+
+def test_no_money():
+    session = Session()
+
+    u1 = User(nick="roman", discord_id=0, guild_id=0, money=1000)
+    u2 = User(nick="ryszard", discord_id=1, guild_id=0, money=1000)
+    session.add_all([u1, u2])
+
+    b1 = u1.create_bet(session, "test bet")
+    u1.enter_bet(session, b1, 100, True)
+    with pytest.raises(ValueError):
+        u2.enter_bet(session, b1, 9999999, False)
+
+    b1.resolve(session, True)
+
+    assert u1.money == 1000
+    assert u2.money == 1000
+
+    session.commit()
+    session.close()
 
 
 def test_two_bets():
@@ -55,24 +78,26 @@ def test_two_bets():
     assert u1.money == 800
     assert u2.money == 1200
 
+    session.commit()
+    session.close()
 
-def test_no_money():
+
+
+def test_single_better_lost():
     session = Session()
 
     u1 = User(nick="roman", discord_id=0, guild_id=0, money=1000)
-    u2 = User(nick="ryszard", discord_id=1, guild_id=0, money=1000)
-    session.add_all([u1, u2])
+    session.add_all([u1])
 
     b1 = u1.create_bet(session, "test bet")
-    u1.enter_bet(session, b1, 100, True)
-    with pytest.raises(ValueError):
-        u2.enter_bet(session, b1, 9999999, False)
 
+    b1.enter_user(session, u1, 500, False)
     b1.resolve(session, True)
 
-    assert u1.money == 1000
-    assert u2.money == 1000
+    assert u1.money == 500
 
+    session.commit()
+    session.close()
 
 def test_two_bets_no_money():
     session = Session()
@@ -98,19 +123,9 @@ def test_two_bets_no_money():
     assert u1.money == 100
     assert u2.money == 1900
 
+    session.commit()
+    session.close()
 
-def test_single_better_lost():
-    session = Session()
-
-    u1 = User(nick="roman", discord_id=0, guild_id=0, money=1000)
-    session.add_all([u1])
-
-    b1 = u1.create_bet(session, "test bet")
-
-    b1.enter_user(session, u1, 500, False)
-    b1.resolve(session, True)
-
-    assert u1.money == 500
 
 
 def test_past_bets_limiting_money():
@@ -132,6 +147,9 @@ def test_past_bets_limiting_money():
     b2.resolve(session, True)
     
     assert u1.money == 1000
+
+    session.commit()
+    session.close()
 
 
 def test_leave_bet():
@@ -161,6 +179,9 @@ def test_leave_bet():
 
     assert u1.money == 1300
     assert u2.money == 700
+
+    session.commit()
+    session.close()
 
 
 
