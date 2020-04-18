@@ -40,7 +40,7 @@ class TimeSpent(commands.Cog):
             td = timedelta(seconds=t)
             message += f"{user}: {td}\n"
 
-            await ctx.channel.send(message)
+        await ctx.channel.send(message)
 
         print(res)
 
