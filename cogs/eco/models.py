@@ -6,16 +6,9 @@ import random
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Boolean, func
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
+from cogs.db import Base, Session
 import dotenv
 import os
-
-dotenv.load_dotenv()
-DATABASE_URL = os.getenv('DATABASE_URL')
-
-
-engine: sqlalchemy.engine.Engine = sqlalchemy.create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
-Base = declarative_base()
 
 
 class User(Base):
@@ -136,7 +129,7 @@ User.bet_entries = relationship("BetEntry", order_by=BetEntry.id, back_populates
 Bet.entries = relationship("BetEntry", order_by=BetEntry.id, back_populates="bet")
 
 
-Base.metadata.create_all(engine)
+Base.metadata.create_all()
 
 
 if __name__ == "__main__":
