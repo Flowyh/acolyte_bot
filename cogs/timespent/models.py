@@ -1,6 +1,6 @@
 from ..db import Base, Session
 
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, Integer, String, Date, desc
 from sqlalchemy.sql import func
 
 from datetime import date
@@ -24,12 +24,14 @@ class TimeEntry(Base):
     def get_summary(cls, guild_id):
         session = Session()
 
+        today = date.today()
         res = session.query(TimeEntry.discord_id,
                             func.sum(TimeEntry.amount * TimeEntry.resolution).label("total_time"),
                             )\
                             .filter_by(guild_id=guild_id)\
+                            .filter_by(day=today)\
                             .group_by(TimeEntry.discord_id)\
-                            .order_by("total_time")\
+                            .order_by(desc("total_time"))\
                             .all()
         return res
 
