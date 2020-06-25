@@ -79,5 +79,6 @@ async def reload(ctx, extension):
 bot.load_extension("cogs.vote")
 bot.load_extension("cogs.timespent")
 bot.load_extension("cogs.bet")
+bot.load_extension("cogs.userdata")
 
 bot.run(TOKEN)
